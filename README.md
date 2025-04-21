@@ -1,51 +1,71 @@
-# Secure-chatroom
-## Overview
-A chat app demonstrating the importance of encryption, authentication, and attack prevention through secure and insecure versions.
-This project aims to implement security principles to develop a secure chat application that protects against these threats. Additionally, the project will demonstrate the vulnerabilities of insecure applications to educate users on the importance of security.
+# Secure Chat Room with Usernames
 
-## Objectives and Scope
-# Objectives:
-Develop a secure chat application using encryption and authentication
-Create a version where only simple security features are implemented to demonstrate vulnerabilities and how each security feature covers other’s vulnerabilities
-Vulnerability Examples: Man-In-The-Middle, Message Tampering, Spoofing
-# Scope:
-The focus will be on web-based or command-line interface
-Not a mobile or desktop app
-It will strictly be a text-based chat
-No files, images, etc
+This project is a simple terminal-based chat application that allows multiple users to communicate in real time through a server. It supports user-defined names and demonstrates socket programming in Python.
 
+> This is the **insecure version** — future stages of the project will include encryption, authentication, and simulated attacks.
 
-## Features
-- Secure messaging with AES/RSA
-- Login system
-- MITM, Spoofing, and Tampering attack simulations
+---
 
-## How to download
-### Option 1: Clone the Repository
-1. Open a termina
-2. Navigate to the folder where you want to save the project
-3. Run: 
-git clone https://github.com/your-username/secure-chatroom.git
-cd secure-chatroom
+## How to Run the Project
 
-### Option 2:
-1. Go to repository page on GitHub
-2. Click the green Code button
-3. Select Download Zip
-4. Extract the zip file on your machine
-5. Open the terminal and navigate into the project folder:
-cd path/to/secure-chatroom
+### Requirements
 
-## How to run:
-- Create and activate a virtual environment (optional but recommended):
-python3 -m venv venv
-source venv/bin/activate     # macOS/Linux
-venv\Scripts\activate.bat    # Windows
-- Install dependencies:
+- Python 3.10 or newer (recommended)
+- OS: macOS, Linux, or Windows
+- All dependencies are standard (`socket`, `threading`, etc.)
+- Required Libraries:
+    - cryptography — used for AES encryption
+
+Install Dependencies
+If you haven’t already:
+```
 pip install -r requirements.txt
+```
+---
+### Setup
 
+1. **Clone the repository:**
+git clone https://github.com/your-username/secure-chat-room.git
+cd secure-chat-room
 
-## Team 
+2. **Create a virtual environment:**
+python3 -m venv venv
+source venv/bin/activate  # macOS/Linux
+venv\Scripts\activate     # Windows
+---
+### Running the server
+cd server
+python3 basic_server.py
+
+Enter the server IP address
+Type CTRL^C to exit
+---
+### Running the client
+In a new terminal window:
+cd client
+python3 basic_client.py
+
+- Enter the same IP and port as the server
+- Enter your username
+- Type messages to chat
+- Type exit to disconnect cleanly
+
+---
+## Features 
+- Supports multiple users
+- Custom usernames
+- Graceful disconnect (exit)
+- Server shutdown via Ctrl + C with proper cleanup
+
+---
+## Team:
+- Anna Niedzialek
 - Sunny Doan
 - Aaron Mundanilkunathil
-- Ania Niedzialek
+
+**Course:**<br>
+CS 166 — Information Security<br>
+Instructor: Dr. Chao-Li Tarng<br>
+Semester: Spring 2025<br>
+Team #: 11
+
