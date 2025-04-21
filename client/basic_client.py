@@ -29,12 +29,13 @@ def start_client():
 
     while True:
         msg = input(f"[{username}] > ")
+        encrypted = encrypt_message(f"[{username}]: {msg}")
+        client.send(encrypted)
+
         if msg.lower() == "exit":
-            encrypted = encrypt_message(f"[{username}]: {msg}")
-            client.send(encrypted)
             client.close()
             break
-        client.send(f"[{username}]: {msg}".encode('utf-8'))
+
 
 
 start_client()
