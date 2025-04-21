@@ -6,8 +6,6 @@ This project is a simple terminal-based chat application that allows multiple us
 
 ---
 
----
-
 ## How to Run the Project
 
 ### Requirements
@@ -15,54 +13,51 @@ This project is a simple terminal-based chat application that allows multiple us
 - Python 3.10 or newer (recommended)
 - OS: macOS, Linux, or Windows
 - All dependencies are standard (`socket`, `threading`, etc.)
-
+---
 ### Setup
 
 1. **Clone the repository:**
-
-```bash
 git clone https://github.com/your-username/secure-chat-room.git
 cd secure-chat-room
 
-
-2. **Create a virtual environment:
+2. **Create a virtual environment:**
 python3 -m venv venv
 source venv/bin/activate  # macOS/Linux
 venv\Scripts\activate     # Windows
-
+---
 ### Running the server
 cd server
 python3 basic_server.py
 
 Enter the server IP address
 Type CTRL^C to exit
-
+---
 ### Running the client
 In a new terminal window:
 cd client
 python3 basic_client.py
-Enter the same IP and port as the server
 
-Enter your username
+- Enter the same IP and port as the server
+- Enter your username
+- Type messages to chat
+- Type exit to disconnect cleanly
 
-Type messages to chat
+---
+## Features 
+- Supports multiple users
+- Custom usernames
+- Graceful disconnect (exit)
+- Server shutdown via Ctrl + C with proper cleanup
 
-Type exit to disconnect cleanly
+---
+## Team:
+- Anna Niedzialek
+- Sunny Doan
+- Aaron Mundanilkunathil
 
-*** Features 
-Supports multiple users
-Custom usernames
-Graceful disconnect (exit)
-Server shutdown via Ctrl + C with proper cleanup
-
-
-Team:
-Anna Niedzialek
-Sunny Doan
-Aaron Mundanilkunathil
-
-Course: CS 166 — Information Security
-Instructor: Dr. Chao-Li Tarng
-Semester: Spring 2025
+**Course:**<br>
+CS 166 — Information Security<br>
+Instructor: Dr. Chao-Li Tarng<br>
+Semester: Spring 2025<br>
 Team #: 11
 
