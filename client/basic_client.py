@@ -9,7 +9,7 @@ def receive_messages(sock):
     while True:
         try:
             msg = sock.recv(1024).decode('utf-8')
-            print(msg)
+            print(f"\r{msg}\n[{username}] > ", end="")
         except:
             print("Disconnected from server.")
             break
@@ -22,7 +22,7 @@ def start_client():
     thread.start()
     
     while True:
-        msg = input()
+        msg = input(f"[{username}] > ")
         if msg.lower() == "exit":
             client.send(f"[{username}] has left the chat.".encode('utf-8'))
             client.close()
