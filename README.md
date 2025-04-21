@@ -13,6 +13,14 @@ This project is a simple terminal-based chat application that allows multiple us
 - Python 3.10 or newer (recommended)
 - OS: macOS, Linux, or Windows
 - All dependencies are standard (`socket`, `threading`, etc.)
+- Required Libraries:
+    - cryptography — used for AES encryption
+
+Install Dependencies
+If you haven’t already:
+```
+pip install -r requirements.txt
+```
 ---
 ### Setup
 
