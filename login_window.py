@@ -108,7 +108,7 @@ class LoginWindow(QWidget):
         if username in users and users[username] == hashed:
             self.label.setText(f"Login successful! Welcome to Chatroom, {username}!")
             
-            self.chat_window = ChatWindow(username)
+            self.chat_window = ChatWindow(username, self)
             self.chat_window.show()
             self.hide()
         else:
@@ -141,9 +141,10 @@ PORT = 12345
 
 
 class ChatWindow(QWidget):
-    def __init__(self, username):
+    def __init__(self, username, login_window=None):
         super().__init__()
         self.username = username
+        self.login_window = login_window
         
         self.setWindowTitle(f"Chatroom - {username}")
         self.setGeometry(250, 250, 400, 500)
@@ -163,9 +164,9 @@ class ChatWindow(QWidget):
         self.send_button.clicked.connect(self.send_message)
         input_layout.addWidget(self.send_button)
         
-        # self.status_label = QLabel("Connected")
-        # layout.addWidget(self.status_label)
-        
+        self.logout_button = QPushButton("Log Out")
+        self.logout_button.clicked.connect(self.logout)
+        layout.addWidget(self.logout_button)
         
         layout.addLayout(input_layout)
         self.setLayout(layout)
@@ -246,6 +247,15 @@ class ChatWindow(QWidget):
             except:
                 # self.status_label.setText("Disconnected")
                 break
+            
+    def logout(self):
+        self.client_socket.close()
+        self.close()
+        
+        self.login_window = LoginWindow()
+        self.login_window.show()
+        if self.login_window:
+            self.login_window.show()
             
 
 if __name__ == "__main__":
