@@ -6,7 +6,6 @@ from PyQt5.QtCore import Qt
 
 import sys
 
-import sys
 import json
 import hashlib
 import os
