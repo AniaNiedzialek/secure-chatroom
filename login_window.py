@@ -183,7 +183,7 @@ class ChatWindow(QWidget):
         self.message_input.textChanged.connect(self.check_input)
         
         self.signals = SignalWrapper()
-        self.signals.message_received.connect(self.chat_display.append)
+        self.signals.message_received.connect(self.display_message)
 
         
         self.setStyleSheet("""
@@ -234,7 +234,7 @@ class ChatWindow(QWidget):
             encrypted = encrypt_message(full_message)
             self.client_socket.send(encrypted)
             
-            self.chat_display.append(full_message)
+            # self.chat_display.append(full_message)
             self.message_input.clear()
     
     def receive_message(self):
@@ -256,6 +256,13 @@ class ChatWindow(QWidget):
         self.login_window.show()
         if self.login_window:
             self.login_window.show()
+            
+    def display_message(self, message):
+        if message.startswith(f"[{self.username}]"):
+            formatted = f'<span style="color:#d7aaff;">{message}</span>'
+        else:
+            formatted = f'<span style="color:#80dfff;">{message}</span>'
+        self.chat_display.append(formatted)
             
 
 if __name__ == "__main__":

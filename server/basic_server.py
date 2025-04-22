@@ -20,11 +20,10 @@ def handle_client(conn, addr):
     
 def broadcast(message, sender_conn):
     for client in clients[:]:
-        if client != sender_conn:
-            try:
-                client.send(message)
-            except:
-                clients.remove(client)
+        try:
+            client.send(message)
+        except:
+            clients.remove(client)
 
             
 def start_server():
