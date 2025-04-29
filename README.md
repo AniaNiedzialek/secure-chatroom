@@ -6,7 +6,7 @@ This is a secure chatroom built in Python for the CS 166 course. It features log
 This simple terminal-based chat application that allows multiple users to communicate in real time through a server, and supports user-defined names and demonstrates socket programming in Python.
 
 
-![Login UI] (/demo/login.png)
+![Login UI](demo/login.png)
 ## How to Run the Project
 
 ### Requirements
