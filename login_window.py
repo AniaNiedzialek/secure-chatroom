@@ -32,6 +32,7 @@ class LoginWindow(QWidget):
         self.setWindowTitle("SafeChat")
         self.setGeometry(200,200, 400, 300)
         
+        
         layout = QVBoxLayout()
         
         self.intro = QLabel("Welcome to the SafeChat!")
@@ -154,6 +155,8 @@ class ChatWindow(QWidget):
         self.chat_display.setReadOnly(True)
         layout.addWidget(self.chat_display)
         
+        self.load_history()
+        
         input_layout = QHBoxLayout()
         self.message_input = QLineEdit()
         self.message_input.setPlaceholderText("Type your message...")
@@ -172,7 +175,15 @@ class ChatWindow(QWidget):
         
         # socekts
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.client_socket.connect((HOST, PORT))
+       
+        try :
+            self.client_socket.connect((HOST, PORT))
+            self.connected = True
+        except:
+            self.chat_display.setPlainText("Cannot connect to the server...")
+            self.connected = False
+            return  
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)      
         
         receive_thread = threading.Thread(target=self.receive_message)
         receive_thread.daemon = True
@@ -226,14 +237,19 @@ class ChatWindow(QWidget):
         self.send_button.setEnabled(bool(text))
     
     def send_message(self):
+        if not self.connected:
+            self.chat_display.append("You are not connected to the server!")
+            return
+        
         message = self.message_input.text()
         self.message_input.returnPressed.connect(self.send_message)
         if message:
             full_message = f"[{self.username}]: {message}"
             encrypted = encrypt_message(full_message)
             self.client_socket.send(encrypted)
-            
-            # self.chat_display.append(full_message)
+                        
+            with open(f"history_{self.username}.txt", "a") as f:
+                f.write(full_message + "\n")
             self.message_input.clear()
     
     def receive_message(self):
@@ -262,7 +278,14 @@ class ChatWindow(QWidget):
         else:
             formatted = f'<span style="color:#80dfff;">{message}</span>'
         self.chat_display.append(formatted)
-            
+    
+    def load_history(self):
+        try: 
+            with open(f"history_{self.username}.txt", "r") as f:
+                history = f.read()
+                self.chat_display.setPlainText(history)
+        except FileNotFoundError:
+            self.chat_display.setPlainText("[No chat history]")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
