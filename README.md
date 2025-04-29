@@ -1,10 +1,24 @@
 # Secure Chat Room with Usernames
+## Project Overview
 
-This project is a simple terminal-based chat application that allows multiple users to communicate in real time through a server. It supports user-defined names and demonstrates socket programming in Python.
+This is a secure chatroom built in Python for hte CS !^^ course. It features login/registration, AES_based message encryption, multi-client support, GUI (PyQt5), and simulated attacks (MITM, tampering, spoofing).
 
-> This is the **insecure version** — future stages of the project will include encryption, authentication, and simulated attacks.
+This simple terminal-based chat application that allows multiple users to communicate in real time through a server, and supports user-defined names and demonstrates socket programming in Python.
 
----
+
+## Directory Structure
+chatroom/
+    attacks/
+        mitm.py
+    client/
+        crypto_utils.py
+    server
+        basic_Server.py
+    login_window.py
+    users.json
+    history_<users>.txt
+    requirements.txt
+    README.md
 
 ## How to Run the Project
 
@@ -21,6 +35,20 @@ If you haven’t already:
 ```
 pip install -r requirements.txt
 ```
+
+1. Install Requirements
+```
+pip install pyqt5 cryptography
+```
+2. Start the server
+```
+python3 server/basic_server.py
+```
+3. Launch the GUI
+```
+python3 login_window.py
+```
+Use different terminals to simulate multiple users
 ---
 ### Setup
 
@@ -49,15 +77,46 @@ python3 basic_client.py
 - Enter your username
 - Type messages to chat
 - Type exit to disconnect cleanly
+---
+### Encryption Mode
+Uses AES with a predefined key. Messages are encrypted in send_message and decrypted in receive_message.
+
+To temporarily disable encryption for demo purposes:
+In login_window.py:
+```
+#encrypted = encrypted_message(full_message)
+#self.client_socket.send(encrypted)
+self.client_socket.send(full_message.encode())
+```
+
+and
+```
+# message = decrypt_message(data)
+message = data.decode()
+```
+---
+MITM Attack Simulation (Manual)
+### Set up steps
+1. Run proxy
+```
+python3 attacks/mitm.py
+```
+2. In login_window.py, set:
+```
+PORT = 8080 # instead of 12345
+```
+3. Run the server on port 12345
+```
+python3 server/basic_server.py
+```
+4. Launch chat clients. Messages will pass through the proxy
+example output:
+[Proxy] Got connection from ('127.0.0.1', 54201)
+[C→S] [Ania]: Hello Sunny!
+[S→C] [Sunny]: Hi Ania!
 
 ---
-## Features 
-- Supports multiple users
-- Custom usernames
-- Graceful disconnect (exit)
-- Server shutdown via Ctrl + C with proper cleanup
 
----
 ## Team:
 - Anna Niedzialek
 - Sunny Doan
