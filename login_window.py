@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtCore import pyqtSignal, QObject
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMessageBox
 
 import sys
 
@@ -180,8 +181,9 @@ class ChatWindow(QWidget):
             self.client_socket.connect((HOST, PORT))
             self.connected = True
         except:
-            self.chat_display.setPlainText("Cannot connect to the server...")
             self.connected = False
+            QMessageBox.critical(self, "Connection Error", "Cannot connect to the server.\nMake sure it is running...")
+            self.close()
             return  
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)      
         
