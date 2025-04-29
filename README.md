@@ -1,7 +1,7 @@
 # Secure Chat Room with Usernames
 ## Project Overview
 
-This is a secure chatroom built in Python for hte CS !^^ course. It features login/registration, AES_based message encryption, multi-client support, GUI (PyQt5), and simulated attacks (MITM, tampering, spoofing).
+This is a secure chatroom built in Python for the CS 166 course. It features login/registration, AES_based message encryption, multi-client support, GUI (PyQt5), and simulated attacks (MITM, tampering, spoofing).
 
 This simple terminal-based chat application that allows multiple users to communicate in real time through a server, and supports user-defined names and demonstrates socket programming in Python.
 
