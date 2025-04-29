@@ -6,20 +6,6 @@ This is a secure chatroom built in Python for the CS 166 course. It features log
 This simple terminal-based chat application that allows multiple users to communicate in real time through a server, and supports user-defined names and demonstrates socket programming in Python.
 
 
-## Directory Structure
-chatroom/
-    attacks/
-        mitm.py
-    client/
-        crypto_utils.py
-    server
-        basic_Server.py
-    login_window.py
-    users.json
-    history_<users>.txt
-    requirements.txt
-    README.md
-
 ## How to Run the Project
 
 ### Requirements
@@ -62,8 +48,10 @@ source venv/bin/activate  # macOS/Linux
 venv\Scripts\activate     # Windows
 ---
 ### Running the server
+```
 cd server
 python3 basic_server.py
+```
 
 Enter the server IP address
 Type CTRL^C to exit
