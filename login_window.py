@@ -138,7 +138,7 @@ import threading
 from client.crypto_utils import encrypt_message, decrypt_message
 
 HOST = "127.0.0.1"
-PORT = 12345
+PORT = 8080
 
 
 class ChatWindow(QWidget):
@@ -186,6 +186,10 @@ class ChatWindow(QWidget):
             self.close()
             return  
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)      
+        
+        self.client_socket.connect((HOST, PORT))
+        print("[Client] Connected to proxy!")
+
         
         receive_thread = threading.Thread(target=self.receive_message)
         receive_thread.daemon = True
@@ -240,16 +244,18 @@ class ChatWindow(QWidget):
     
     def send_message(self):
         if not self.connected:
-            self.chat_display.append("You are not connected to the server!")
+            QMessageBox.warning(self, "Not Connected", "You are not connected to the server.")
             return
         
         message = self.message_input.text()
         self.message_input.returnPressed.connect(self.send_message)
         if message:
             full_message = f"[{self.username}]: {message}"
-            encrypted = encrypt_message(full_message)
-            self.client_socket.send(encrypted)
+            # for the MITM attack simulation
+            # encrypted = encrypt_message(full_message)
+            # self.client_socket.send(encrypted)
                         
+            self.client_socket.send(full_message.encode())
             with open(f"history_{self.username}.txt", "a") as f:
                 f.write(full_message + "\n")
             self.message_input.clear()
@@ -259,7 +265,8 @@ class ChatWindow(QWidget):
             try: 
                 data = self.client_socket.recv(1024)    
                 if data:
-                    message = decrypt_message(data)
+                    # message = decrypt_message(data)
+                    message = data.decode()
                     self.signals.message_received.emit(message)
             except:
                 # self.status_label.setText("Disconnected")
