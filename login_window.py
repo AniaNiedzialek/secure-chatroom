@@ -138,7 +138,7 @@ import threading
 from client.crypto_utils import encrypt_message, decrypt_message
 
 HOST = "127.0.0.1"
-PORT = 8080
+PORT = 12345 #8080 for MITM attack
 
 
 class ChatWindow(QWidget):
@@ -252,10 +252,10 @@ class ChatWindow(QWidget):
         if message:
             full_message = f"[{self.username}]: {message}"
             # for the MITM attack simulation
-            # encrypted = encrypt_message(full_message)
-            # self.client_socket.send(encrypted)
+            encrypted = encrypt_message(full_message)
+            self.client_socket.send(encrypted)
                         
-            self.client_socket.send(full_message.encode())
+            # self.client_socket.send(full_message.encode())
             with open(f"history_{self.username}.txt", "a") as f:
                 f.write(full_message + "\n")
             self.message_input.clear()
@@ -265,8 +265,8 @@ class ChatWindow(QWidget):
             try: 
                 data = self.client_socket.recv(1024)    
                 if data:
-                    # message = decrypt_message(data)
-                    message = data.decode()
+                    message = decrypt_message(data)
+                    # message = data.decode()
                     self.signals.message_received.emit(message)
             except:
                 # self.status_label.setText("Disconnected")
