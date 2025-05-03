@@ -185,8 +185,7 @@ class ChatWindow(QWidget):
             self.connected = False
             QMessageBox.critical(self, "Connection Error", "Cannot connect to the server.\nMake sure it is running...")
             self.close()
-            return  
-        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)      
+            return    
 
         receive_thread = threading.Thread(target=self.receive_message)
         receive_thread.daemon = True
