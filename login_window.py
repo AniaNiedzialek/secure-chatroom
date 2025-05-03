@@ -180,17 +180,14 @@ class ChatWindow(QWidget):
         try :
             self.client_socket.connect((HOST, PORT))
             self.connected = True
+            print("[Client] Connected to proxy!")
         except:
             self.connected = False
             QMessageBox.critical(self, "Connection Error", "Cannot connect to the server.\nMake sure it is running...")
             self.close()
             return  
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)      
-        
-        self.client_socket.connect((HOST, PORT))
-        print("[Client] Connected to proxy!")
 
-        
         receive_thread = threading.Thread(target=self.receive_message)
         receive_thread.daemon = True
         receive_thread.start()

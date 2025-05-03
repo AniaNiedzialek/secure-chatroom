@@ -1,8 +1,13 @@
 import socket 
 import threading
 
-HOST = input("Enter server IP address (run 'ifconfig lo0' command if unsure: ")
-PORT = 12345
+HOST = input("Enter server IP address (default: 127.0.0.1): ") or "127.0.0.1"
+PORT = input("Enter server port (default: 12345): ") or "12345"
+try:
+    PORT = int(PORT)
+except ValueError:
+    print("Invalid port number. Using default 12345")
+    PORT = 12345
 clients = []
 
 def handle_client(conn, addr):
