@@ -146,11 +146,19 @@ class ChatWindow(QWidget):
         super().__init__()
         self.username = username
         self.login_window = login_window
+        self.encryption_enabled = True  # Default to enabled
         
         self.setWindowTitle(f"Chatroom - {username}")
         self.setGeometry(250, 250, 400, 500)
         
         layout = QVBoxLayout()
+        
+        # Add encryption toggle button
+        self.encryption_toggle = QPushButton("Encryption: ON")
+        self.encryption_toggle.setCheckable(True)
+        self.encryption_toggle.setChecked(True)
+        self.encryption_toggle.clicked.connect(self.toggle_encryption)
+        layout.addWidget(self.encryption_toggle)
         
         self.chat_display = QTextEdit()
         self.chat_display.setReadOnly(True)
@@ -238,6 +246,13 @@ class ChatWindow(QWidget):
         text = self.message_input.text().strip()
         self.send_button.setEnabled(bool(text))
     
+    def toggle_encryption(self):
+        self.encryption_enabled = self.encryption_toggle.isChecked()
+        self.encryption_toggle.setText(f"Encryption: {'ON' if self.encryption_enabled else 'OFF'}")
+        self.encryption_toggle.setStyleSheet(
+            "background-color: #4CAF50;" if self.encryption_enabled else "background-color: #f44336;"
+        )
+    
     def send_message(self):
         if not self.connected:
             QMessageBox.warning(self, "Not Connected", "You are not connected to the server.")
@@ -247,25 +262,39 @@ class ChatWindow(QWidget):
         self.message_input.returnPressed.connect(self.send_message)
         if message:
             full_message = f"[{self.username}]: {message}"
-            # for the MITM attack simulation
-            encrypted = encrypt_message(full_message)
-            self.client_socket.send(encrypted)
-                        
-            # self.client_socket.send(full_message.encode())
-            with open(f"history_{self.username}.txt", "a") as f:
-                f.write(full_message + "\n")
-            self.message_input.clear()
+            
+            try:
+                if self.encryption_enabled:
+                    encrypted_message = encrypt_message(full_message)
+                    self.client_socket.send(encrypted_message)
+                else:
+                    self.client_socket.send(full_message.encode())
+                
+                self.message_input.clear()
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to send message: {str(e)}")
     
     def receive_message(self):
-        while True: 
-            try: 
-                data = self.client_socket.recv(1024)    
-                if data:
-                    message = decrypt_message(data)
-                    # message = data.decode()
+        while self.connected:
+            try:
+                data = self.client_socket.recv(4096)
+                if not data:
+                    break
+                    
+                try:
+                    # Try to decrypt first (in case it's encrypted)
+                    decrypted_message = decrypt_message(data)
+                    if self.encryption_enabled:
+                        self.signals.message_received.emit(decrypted_message)
+                    else:
+                        self.signals.message_received.emit(f"[Encrypted Message Received]")
+                except:
+                    # If decryption fails, treat as plain text
+                    message = data.decode()
                     self.signals.message_received.emit(message)
-            except:
-                # self.status_label.setText("Disconnected")
+                    
+            except Exception as e:
+                print(f"Error receiving message: {e}")
                 break
             
     def logout(self):
