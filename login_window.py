@@ -36,13 +36,27 @@ class ConnectionWindow(QWidget):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignCenter)
         
+        # Server connection fields
         self.ip_input = QLineEdit()
-        self.ip_input.setPlaceholderText("Server IP Addres")
+        self.ip_input.setPlaceholderText("Server IP Address")
         layout.addWidget(self.ip_input)
         
         self.port_input = QLineEdit()
-        self.port_input.setPlaceholderText("Port Number")
+        self.port_input.setPlaceholderText("Server Port Number")
         layout.addWidget(self.port_input)
+        
+        # MITM proxy fields
+        self.mitm_ip_input = QLineEdit()
+        self.mitm_ip_input.setPlaceholderText("MITM Proxy IP (optional) - default 127.0.0.1")
+        # self.mitm_ip_input.setText("127.0.0.1")  # Default value
+        layout.addWidget(self.mitm_ip_input)
+        
+        self.mitm_port_input = QLineEdit()
+        self.mitm_port_input.setPlaceholderText("MITM Proxy Port (optional) - default 8080")
+        # The above code is setting the text of the `mitm_port_input` widget to "8080", which is the
+        # default value.
+        # self.mitm_port_input.setText("8080")  # Default value
+        layout.addWidget(self.mitm_port_input)
         
         self.connect_button = QPushButton("Next")
         self.connect_button.clicked.connect(self.proceed_to_login)
@@ -52,11 +66,9 @@ class ConnectionWindow(QWidget):
         self.setStyleSheet("""
             QWidget {
                 background-color: #472d45;
-
                 font-family: 'Helvetica Neue';
                 font-size: 13px;
                 color: #ffffff;
-
             }
         
             QLineEdit {
@@ -79,31 +91,35 @@ class ConnectionWindow(QWidget):
                 background-color: #bc5ebf;
             }
         """)
-        
-    
-    
-    
-    
     
     def proceed_to_login(self):
         ip = self.ip_input.text().strip()
         port = int(self.port_input.text().strip())
         
+        # Get MITM values with defaults if empty
+        mitm_ip = self.mitm_ip_input.text().strip() or "127.0.0.1"
+        try:
+            mitm_port = int(self.mitm_port_input.text().strip()) if self.mitm_port_input.text().strip() else 8080
+        except ValueError:
+            mitm_port = 8080  # Default if invalid number
+        
         if not ip or not port:
-            QMessageBox.warning(self, "Error", "Enter a valid IP and port.")
+            QMessageBox.warning(self, "Error", "Enter a valid server IP and port.")
             return
         
-        self.login_window = LoginWindow(ip, port)
+        self.login_window = LoginWindow(ip, port, mitm_ip, mitm_port)
         self.login_window.show()
         self.close()
         
         
  
 class LoginWindow(QWidget):
-    def __init__(self, ip, port):
+    def __init__(self, ip, port, mitm_ip, mitm_port):
         super().__init__()
         self.ip = ip
         self.port = port
+        self.mitm_ip = mitm_ip
+        self.mitm_port = mitm_port
                 
         self.setWindowTitle("SafeChat")
         self.setGeometry(200,200, 400, 300)
@@ -188,7 +204,7 @@ class LoginWindow(QWidget):
         if username in users and users[username] == hashed:
             self.label.setText(f"Login successful! Welcome to Chatroom, {username}!")
             
-            self.chat_window = ChatWindow(username, self.ip, self.port, self)
+            self.chat_window = ChatWindow(username, self.ip, self.port, self.mitm_ip, self.mitm_port, self)
             self.chat_window.show()
             self.hide()
         else:
@@ -221,25 +237,40 @@ from client.crypto_utils import encrypt_message, decrypt_message
 
 
 class ChatWindow(QWidget):
-    def __init__(self, username, ip, port, login_window=None):
+    def __init__(self, username, ip, port, mitm_ip, mitm_port, login_window=None):
         super().__init__()
         self.running = True
         
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        
+        # Add MITM proxy option
+        self.use_mitm = QMessageBox.question(
+            self, 
+            "Connection Mode",
+            "Do you want to use MITM proxy?",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        ) == QMessageBox.Yes
+        
         try:
-            # self.client_socket.connect((ip, port))
-            # client connects to proxy for MITM
-            self.client_socket.connect(("127.0.0.1", 8080))
+            if self.use_mitm:
+                # Connect through MITM proxy using provided details
+                self.client_socket.connect((mitm_ip, mitm_port))
+            else:
+                # Direct connection to server
+                self.client_socket.connect((ip, port))
             self.connected = True
             print("[Client] connected to the server.")
         except Exception as e:
             self.connected = False
-            QMessageBox.critical(self, "Connection Failed", f"Could not connect to the {ip}:{port}\nError: {str(e)}")
+            QMessageBox.critical(self, "Connection Failed", f"Could not connect to the server\nError: {str(e)}")
             self.close()
             return
         self.username = username
         self.ip = ip
         self.port = port
+        self.mitm_ip = mitm_ip
+        self.mitm_port = mitm_port
         self.login_window = login_window
         self.encryption_enabled = True  # Default to enabled
         
@@ -385,7 +416,7 @@ class ChatWindow(QWidget):
         self.client_socket.close()
         self.close()
         
-        self.login_window = LoginWindow(self.ip, self.port)
+        self.login_window = LoginWindow(self.ip, self.port, self.mitm_ip, self.mitm_port)
         self.login_window.show()
 
     def display_message(self, message):

@@ -2,15 +2,15 @@ import socket
 import threading
 import sys
 
-if len(sys.argv) != 3:
-    print("Usage:python mitm.py <REAL_SERVER_HOST> <REAL_SERVER_PORT>")
+if len(sys.argv) != 5:
+    print("Usage: python mitm.py <REAL_SERVER_HOST> <REAL_SERVER_PORT> <LISTEN_HOST> <LISTEN_PORT>")
+    print("Example: python mitm.py 127.0.0.1 12345 127.0.0.1 8080")
     sys.exit(1)
 
 REAL_SERVER_HOST = sys.argv[1]
 REAL_SERVER_PORT = int(sys.argv[2])
-
-LISTEN_HOST = '127.0.0.1'
-LISTEN_PORT = 8080
+LISTEN_HOST = sys.argv[3]
+LISTEN_PORT = int(sys.argv[4])
 
 def handle_client(client_sock):
     try:
