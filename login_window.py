@@ -49,42 +49,41 @@ class ConnectionWindow(QWidget):
         layout.addWidget(self.connect_button)
         
         self.setLayout(layout)
-        
         self.setStyleSheet("""
-        QWidget{
-            background-color: #442b54;
+            QWidget {
+                background-color: #472d45;
+
+                font-family: 'Helvetica Neue';
+                font-size: 13px;
                 color: #ffffff;
-                    font-family: 'Helvetica Neue';
-                    font-size: 13px;
-        }
+
+            }
         
-        QTextEdit {
-            background-color: #6d4d6e;
-                border: 1px solid #3e3e55;
-                padding: 8px;
-                color: #d0d0ff;
-        }
-        
-        QLineEdit {
-            background-color: #6d4d6e;
-                border: 1px solid #444466;
+            QLineEdit {
+                background-color: #573d61;
+                border: 1px solid #7e5e74;
+                padding: 5px;
+                border-radius: 4px;
+                color: #f0f0ff;
+            }
+            
+            QPushButton {
+                background-color: #a0588a;
+                color: white;
                 padding: 6px;
-                color: #e0e0ff;
-        }
-        
-        QPushButton {
-            background-color: #6b5e7d;
-            color: white;
-            border-radius:6x;
-            padding: 6px;
-        }
-        
-        QPushButton:hover {
-            background-color: #e667b8;
-                
-        }
-        
+                border: none;
+                border-radius: 6px;
+            }
+            
+            QPushButton:hover {
+                background-color: #bc5ebf;
+            }
         """)
+        
+    
+    
+    
+    
     
     def proceed_to_login(self):
         ip = self.ip_input.text().strip()
@@ -228,7 +227,9 @@ class ChatWindow(QWidget):
         
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.client_socket.connect((ip, port))
+            # self.client_socket.connect((ip, port))
+            # client connects to proxy for MITM
+            self.client_socket.connect(("127.0.0.1", 8080))
             self.connected = True
             print("[Client] connected to the server.")
         except Exception as e:
@@ -257,8 +258,6 @@ class ChatWindow(QWidget):
         self.chat_display = QTextEdit()
         self.chat_display.setReadOnly(True)
         layout.addWidget(self.chat_display)
-        
-        self.load_history()
         
         input_layout = QHBoxLayout()
         self.message_input = QLineEdit()
@@ -396,13 +395,6 @@ class ChatWindow(QWidget):
             formatted = f'<span style="color:#80dfff;">{message}</span>'
         self.chat_display.append(formatted)
     
-    def load_history(self):
-        try: 
-            with open(f"history_{self.username}.txt", "r") as f:
-                history = f.read()
-                self.chat_display.setPlainText(history)
-        except FileNotFoundError:
-            self.chat_display.setPlainText("[No chat history]")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
