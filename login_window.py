@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout
+    QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QInputDialog
 )
 from PyQt5.QtCore import pyqtSignal, QObject
 from PyQt5.QtCore import Qt
@@ -39,23 +39,21 @@ class ConnectionWindow(QWidget):
         # Server connection fields
         self.ip_input = QLineEdit()
         self.ip_input.setPlaceholderText("Server IP Address")
+        self.ip_input.setText("127.0.0.1")  # Set default IP
         layout.addWidget(self.ip_input)
         
         self.port_input = QLineEdit()
         self.port_input.setPlaceholderText("Server Port Number")
+        self.port_input.setText("12345")  # Set default port
         layout.addWidget(self.port_input)
         
         # MITM proxy fields
         self.mitm_ip_input = QLineEdit()
         self.mitm_ip_input.setPlaceholderText("MITM Proxy IP (optional) - default 127.0.0.1")
-        # self.mitm_ip_input.setText("127.0.0.1")  # Default value
         layout.addWidget(self.mitm_ip_input)
         
         self.mitm_port_input = QLineEdit()
         self.mitm_port_input.setPlaceholderText("MITM Proxy Port (optional) - default 8080")
-        # The above code is setting the text of the `mitm_port_input` widget to "8080", which is the
-        # default value.
-        # self.mitm_port_input.setText("8080")  # Default value
         layout.addWidget(self.mitm_port_input)
         
         self.connect_button = QPushButton("Next")
@@ -133,7 +131,6 @@ class LoginWindow(QWidget):
         
         self.label = QLabel("Enter your credentials")
         self.label.setStyleSheet("margin-bottom: 5px;")
-        
         layout.addWidget(self.label)
         
         self.username_input = QLineEdit()
@@ -204,7 +201,7 @@ class LoginWindow(QWidget):
         if username in users and users[username] == hashed:
             self.label.setText(f"Login successful! Welcome to Chatroom, {username}!")
             
-            self.chat_window = ChatWindow(username, self.ip, self.port, self.mitm_ip, self.mitm_port, self)
+            self.chat_window = ChatWindow(username, self.ip, self.port, self.mitm_ip, self.mitm_port)
             self.chat_window.show()
             self.hide()
         else:
@@ -272,7 +269,8 @@ class ChatWindow(QWidget):
         self.mitm_ip = mitm_ip
         self.mitm_port = mitm_port
         self.login_window = login_window
-        self.encryption_enabled = True  # Default to enabled
+        self.encryption_enabled = False  # Default to disabled
+        self.cipher = None  # Will store the Fernet cipher instance
         
         self.setWindowTitle(f"Chatroom - {username}")
         self.setGeometry(250, 250, 400, 500)
@@ -280,9 +278,9 @@ class ChatWindow(QWidget):
         layout = QVBoxLayout()
         
         # Add encryption toggle button
-        self.encryption_toggle = QPushButton("Encryption: ON")
+        self.encryption_toggle = QPushButton("Encryption: OFF")
         self.encryption_toggle.setCheckable(True)
-        self.encryption_toggle.setChecked(True)
+        self.encryption_toggle.setChecked(False)
         self.encryption_toggle.clicked.connect(self.toggle_encryption)
         layout.addWidget(self.encryption_toggle)
         
@@ -293,6 +291,7 @@ class ChatWindow(QWidget):
         input_layout = QHBoxLayout()
         self.message_input = QLineEdit()
         self.message_input.setPlaceholderText("Type your message...")
+        self.message_input.returnPressed.connect(self.send_message)
         input_layout.addWidget(self.message_input)
         
         self.send_button = QPushButton("Send")
@@ -306,7 +305,6 @@ class ChatWindow(QWidget):
         layout.addLayout(input_layout)
         self.setLayout(layout)
         
-
         receive_thread = threading.Thread(target=self.receive_message)
         receive_thread.daemon = True
         receive_thread.start()
@@ -316,28 +314,27 @@ class ChatWindow(QWidget):
         
         self.signals = SignalWrapper()
         self.signals.message_received.connect(self.display_message)
-
         
         self.setStyleSheet("""
             QWidget{
                 background-color: #442b54;
-                    color: #ffffff;
-                        font-family: 'Helvetica Neue';
-                        font-size: 13px;
+                color: #ffffff;
+                font-family: 'Helvetica Neue';
+                font-size: 13px;
             }
             
             QTextEdit {
                 background-color: #6d4d6e;
-                    border: 1px solid #3e3e55;
-                    padding: 8px;
-                    color: #d0d0ff;
+                border: 1px solid #3e3e55;
+                padding: 8px;
+                color: #d0d0ff;
             }
             
             QLineEdit {
                 background-color: #6d4d6e;
-                    border: 1px solid #444466;
-                    padding: 6px;
-                    color: #e0e0ff;
+                border: 1px solid #444466;
+                padding: 6px;
+                color: #e0e0ff;
             }
             
             QPushButton {
@@ -349,9 +346,7 @@ class ChatWindow(QWidget):
             
             QPushButton:hover {
                 background-color: #e667b8;
-                    
             }
-            
         """)
     
     def check_input(self):
@@ -359,11 +354,42 @@ class ChatWindow(QWidget):
         self.send_button.setEnabled(bool(text))
     
     def toggle_encryption(self):
-        self.encryption_enabled = self.encryption_toggle.isChecked()
-        self.encryption_toggle.setText(f"Encryption: {'ON' if self.encryption_enabled else 'OFF'}")
-        self.encryption_toggle.setStyleSheet(
-            "background-color: #4CAF50;" if self.encryption_enabled else "background-color: #f44336;"
-        )
+        if not self.encryption_enabled:
+            # Prompt for encryption key when enabling
+            key, ok = QInputDialog.getText(
+                self, 
+                "Encryption Key",
+                "Enter encryption key (leave empty to cancel):",
+                QLineEdit.Password
+            )
+            
+            if ok and key:
+                try:
+                    from client.crypto_utils import generate_key_from_password, create_cipher
+                    encryption_key = generate_key_from_password(key)
+                    self.cipher = create_cipher(encryption_key)
+                    self.encryption_enabled = True
+                    self.encryption_toggle.setText("Encryption: ON")
+                    self.encryption_toggle.setStyleSheet("background-color: #4CAF50;")
+                    QMessageBox.information(self, "Success", "Encryption enabled successfully!")
+                except Exception as e:
+                    QMessageBox.critical(self, "Error", f"Failed to enable encryption: {str(e)}")
+                    self.encryption_enabled = False
+                    self.encryption_toggle.setChecked(False)
+                    self.encryption_toggle.setText("Encryption: OFF")
+                    self.encryption_toggle.setStyleSheet("")
+            else:
+                self.encryption_enabled = False
+                self.encryption_toggle.setChecked(False)
+                self.encryption_toggle.setText("Encryption: OFF")
+                self.encryption_toggle.setStyleSheet("")
+        else:
+            # Disable encryption
+            self.encryption_enabled = False
+            self.cipher = None
+            self.encryption_toggle.setText("Encryption: OFF")
+            self.encryption_toggle.setStyleSheet("")
+            QMessageBox.information(self, "Encryption Disabled", "Messages will now be sent unencrypted.")
     
     def send_message(self):
         if not self.connected:
@@ -376,8 +402,9 @@ class ChatWindow(QWidget):
             full_message = f"[{self.username}]: {message}"
             
             try:
-                if self.encryption_enabled:
-                    encrypted_message = encrypt_message(full_message)
+                if self.encryption_enabled and self.cipher:
+                    from client.crypto_utils import encrypt_message
+                    encrypted_message = encrypt_message(full_message, self.cipher)
                     self.client_socket.send(encrypted_message)
                 else:
                     self.client_socket.send(full_message.encode())
@@ -395,15 +422,20 @@ class ChatWindow(QWidget):
                     
                 try:
                     # Try to decrypt first (in case it's encrypted)
-                    decrypted_message = decrypt_message(data)
-                    if self.encryption_enabled:
+                    if self.encryption_enabled and self.cipher:
+                        from client.crypto_utils import decrypt_message
+                        decrypted_message = decrypt_message(data, self.cipher)
                         self.signals.message_received.emit(decrypted_message)
                     else:
-                        self.signals.message_received.emit(f"[Encrypted Message Received]")
-                except:
-                    # If decryption fails, treat as plain text
-                    message = data.decode()
-                    self.signals.message_received.emit(message)
+                        # If encryption is disabled or we don't have a cipher, try to decode as plain text
+                        try:
+                            message = data.decode()
+                            self.signals.message_received.emit(message)
+                        except:
+                            self.signals.message_received.emit("[Encrypted Message Received]")
+                except Exception as e:
+                    # If decryption fails, show encrypted message
+                    self.signals.message_received.emit("[Encrypted Message Received]")
                     
             except Exception as e:
                 if self.running:
