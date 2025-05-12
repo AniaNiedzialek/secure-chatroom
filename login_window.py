@@ -25,7 +25,6 @@ def load_users():
     
 class SignalWrapper(QObject):
     message_received = pyqtSignal(str)
- 
 class ConnectionWindow(QWidget):
     def __init__(self):
         super().__init__()
