@@ -88,7 +88,7 @@ MITM Attack Simulation (Manual)
 ### Set up steps
 1. Run proxy
 ```
-python3 attacks/mitm.py
+python3 attacks/mitm.py 127.0.0.1 12345 127.0.0.1 8080
 ```
 2. In login_window.py, set:
 ```
@@ -100,9 +100,10 @@ python3 server/basic_server.py
 ```
 4. Launch chat clients. Messages will pass through the proxy
 example output:
-[Proxy] Got connection from ('127.0.0.1', 54201)
-[C→S] [Ania]: Hello Sunny!
-[S→C] [Sunny]: Hi Ania!
+```
+python3 login_window.py
+```
+run the above line for as many clients as you want to connect to the chat room
 
 ---
 

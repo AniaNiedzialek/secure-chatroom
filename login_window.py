@@ -60,10 +60,7 @@ class ConnectionWindow(QWidget):
         
         self.mitm_port_input = QLineEdit()
         self.mitm_port_input.setPlaceholderText("MITM Proxy Port (optional) - default 8080")
-<<<<<<< HEAD
-=======
-        
->>>>>>> 9789a5e (updates)
+
         layout.addWidget(self.mitm_port_input)
         
         self.connect_button = QPushButton("Next")
