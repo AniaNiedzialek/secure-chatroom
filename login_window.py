@@ -36,6 +36,12 @@ class ConnectionWindow(QWidget):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignCenter)
         
+        # Add note about IP address
+        note_label = QLabel("Note: Enter the server's IP address and port to connect.")
+        note_label.setStyleSheet("color: #a0a0a0; font-style: italic; margin-bottom: 10px;")
+        note_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(note_label)
+        
         # Server connection fields
         self.ip_input = QLineEdit()
         self.ip_input.setPlaceholderText("Server IP Address")
@@ -54,6 +60,10 @@ class ConnectionWindow(QWidget):
         
         self.mitm_port_input = QLineEdit()
         self.mitm_port_input.setPlaceholderText("MITM Proxy Port (optional) - default 8080")
+<<<<<<< HEAD
+=======
+        
+>>>>>>> 9789a5e (updates)
         layout.addWidget(self.mitm_port_input)
         
         self.connect_button = QPushButton("Next")
